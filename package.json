@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/juanca2918/hcrwappandsms#readme",
   "dependencies": {
+    "cron": "^2.2.0",
     "dotenv": "^16.0.3",
     "google-auth-library": "^8.7.0",
     "googleapis": "^110.0.0",
