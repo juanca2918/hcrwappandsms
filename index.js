@@ -5,8 +5,8 @@ require('dotenv').config()
 
 const clientIdent = process.env.clientID
 const client_secrets = process.env.client_secret
-const redirectUriAuth = process.env.redirectUri
-const UriAuth = process.env.UriAuth
+const redirectUri = process.env.redirect_uris
+const UriAuth = process.env.javascript_origins
 const twilioAccount = process.env.YOUR_TWILIO_ACCOUNT_SID
 const twilioAuth = process.env.YOUR_TWILIO_AUTH_TOKEN
 const spreadsheetId = process.env.YOUR_SPREADSHEET_ID
@@ -15,13 +15,14 @@ const twilioPhoneNum = process.env.YOUR_TWILIO_PHONE_NUMBER
 //Funcion principal
 async function sendSmsFromSheet() {
   // Authenticate using the service account key
-  const auth = new google.auth.OAuth2({
+  const Authenticate = new google.auth.OAuth2({
     clientId: clientIdent,
-    client_secret: key.client_secrets,
-    redirectUri: redirectUriAuth
+    client_secret: client_secrets,
+    redirectUri: redirectUri,
+    uriAuth: UriAuth
    });
   
-  const sheets = google.sheets({version: 'v4', auth:auth});
+  const sheets = google.sheets({version: 'v4', auth:Authenticate});
     // ... Use the sheets object to access the Google Sheets API
 
   // Read data from the Google Sheet
