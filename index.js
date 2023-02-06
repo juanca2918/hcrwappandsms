@@ -84,6 +84,3 @@ async function sendSmsFromSheet() {
 const cron = require('cron');
 const job = new cron.CronJob('0 0 * * *', sendSmsFromSheet, null, true, 'America/Bogota');
 job.start()
-
-
-
