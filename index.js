@@ -3,15 +3,22 @@ const twilio = require('twilio');
 const moment = require('moment');
 require('dotenv').config()
 
-const key = require('./client_secret_.json');
+const clientIdent = process.env.clientID
+const client_secrets = process.env.client_secret
+const redirectUriAuth = process.env.redirectUri
+const UriAuth = process.env.UriAuth
+const twilioAccount = process.env.YOUR_TWILIO_ACCOUNT_SID
+const twilioAuth = process.env.YOUR_TWILIO_AUTH_TOKEN
+const spreadsheetId = process.env.YOUR_SPREADSHEET_ID
+const twilioPhoneNum = process.env.YOUR_TWILIO_PHONE_NUMBER
 
 //Funcion principal
 async function sendSmsFromSheet() {
   // Authenticate using the service account key
   const auth = new google.auth.OAuth2({
-    clientId: key.client_id,
-    clientSecret: key.client_secret,
-    redirectUri: 'http://localhost:3000/auth/google/callback'
+    clientId: clientIdent,
+    client_secret: key.client_secrets,
+    redirectUri: redirectUriAuth
    });
   
   const sheets = google.sheets({version: 'v4', auth:auth});
@@ -19,15 +26,15 @@ async function sendSmsFromSheet() {
 
   // Read data from the Google Sheet
   const sheet = await sheets.spreadsheets.values.get({
-    spreadsheetId: `${process.env.YOUR_SPREADSHEET_ID}`,
+    spreadsheetId: `${spreadsheetId}`,
     range: 'Sheet1!A1:E1',
   });
   const rows = sheet.data.values;
 
   // Initialize the Twilio client
   const client = twilio(
-    `${process.env.YOUR_TWILIO_ACCOUNT_SID}`,
-    `${process.env.YOUR_TWILIO_AUTH_TOKEN}`
+    `${twilioAccount}`,
+    `${twilioAuth}`
   );
 
   let hour = moment().format('HH');
@@ -55,7 +62,7 @@ async function sendSmsFromSheet() {
       // Send an SMS message with Twilio
       await client.messages.create({
         to: phoneNumber,
-        from: process.env.YOUR_TWILIO_PHONE_NUMBER,
+        from: twilioPhoneNum,
         body: messageOneDay,
       });
     }
@@ -65,12 +72,14 @@ async function sendSmsFromSheet() {
       // Send an SMS message with Twilio
       await client.messages.create({
         to: phoneNumber,
-        from: process.env.YOUR_TWILIO_PHONE_NUMBER,
+        from: twilioPhoneNum,
         body: messagethirtymin,
       });
     }
   }
 }
 
-// Call the function when the script is run
-sendSmsFromSheet();    
+// Schedule the SMS sending job using cron
+const cron = require('cron');
+const job = new cron.CronJob('0 0 * * *', sendSmsFromSheet, null, true, 'America/Bogota');
+job.start();
