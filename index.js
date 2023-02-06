@@ -5,8 +5,8 @@ require('dotenv').config()
 
 const clientIdent = process.env.clientID
 const client_secrets = process.env.client_secret
-const tokenUri = process.env.token_uri
 const UriAuth = process.env.auth_uri
+const tokenUri = process.env.token_uri
 const twilioAccount = process.env.YOUR_TWILIO_ACCOUNT_SID
 const twilioAuth = process.env.YOUR_TWILIO_AUTH_TOKEN
 const spreadsheetId = process.env.YOUR_SPREADSHEET_ID
