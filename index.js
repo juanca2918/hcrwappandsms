@@ -4,6 +4,7 @@ const twilio = require('twilio');
 const moment = require('moment');
 const express = require('express');
 const app = express();
+const path = require('path');
 require('dotenv').config()
 
 //Variables de entorno
@@ -98,11 +99,26 @@ exports.handler = async function (event, context) {
   return { statusCode: 200, body: 'SMS sending job started' }
 }
 
-app.get('/', sendSmsFromSheet);
-app.get('/politicasprivacidad', function(req, res) {
-  res.send('hello world');
+// Rutas direccionadas
+app.get('/', (req, res) => {
+  // Crea la ruta absoluta al archivo HTML
+  const filePath = path.join(__dirname, 'politicasprivacidad.html');
+  
+  // Establece el tipo de contenido de la respuesta como text/html
+  res.set('Content-Type', 'text/html');
+  
+  // Envía el archivo HTML como respuesta a la petición
+  res.sendFile(filePath);
 });
 
+app.listen(3000, () => {
+  console.log('Example app listening on port 3000!');
+});
+
+// Ruta de activacion de la funcion sendSmsFromSheet
+app.get('/', sendSmsFromSheet);
+
+//El servidor esta escuchando
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
