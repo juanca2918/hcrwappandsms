@@ -25,9 +25,9 @@ async function sendSmsFromSheet(req, res) {
     auth_uri: UriAuth,
     token_uri: tokenUri
   });
-  
+
   // ... Usa el objeto traido de googleapis con los datos de la constante Authenticate para logear en google
-  const sheets = google.sheets({version: 'v4', auth:Authenticate});
+  const sheets = google.sheets({ version: 'v4', auth: Authenticate });
 
   // Lee datos de google sheet
   const sheet = await sheets.spreadsheets.values.get({
@@ -88,7 +88,7 @@ async function sendSmsFromSheet(req, res) {
   }
 
   res.send('Mensajes SMS enviados');
-
+  
 }
 
 // Programa el envio de los mensajes de texto por cron
@@ -99,3 +99,11 @@ exports.handler = async function (event, context) {
 }
 
 app.get('/', sendSmsFromSheet);
+app.get('/politicasprivacidad', function(req, res) {
+  res.send('hello world');
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
