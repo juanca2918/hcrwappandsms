@@ -1,5 +1,6 @@
 //Dependencias
 const moment = require('moment');
+const cron = require('cron');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -17,11 +18,16 @@ const apiKey = process.env.APIKEY
 async function sendSmsFromSheet(req, res) {
   //Usamos fetch para solicitar a google sheet api la hoja de calculo desde donde obtendremos los datos
   fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`)
-    .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
     .then(data => {
       const fechacita = data.values[0][2];
       const name = data.values[0][3];
-      const celular = data.values[0][4];
+      const celular = data.values[0][4];  
       const scheduledTime = moment(fechacita, 'MM/DD/YYYY HH:mm')
       //Para saber que momento del dia es y asi saludar a los usuarios depende de la hora del dia
       let hour = moment().format('HH');
@@ -33,9 +39,9 @@ async function sendSmsFromSheet(req, res) {
       } else {
         saludo = 'Buenas noches!';
       }
-      let messageOneDay = `Buenas ${saludo}, Señor(a) ${name}, le recordamos que tiene cita en la fecha ${appointmentDatetime}`
-      let messagethirtymin = `Buenas ${saludo}, Señor(a) ${name}, le recordamos que tiene cita en 30 min`
-
+      const messageOneDay = `Buenas ${saludo}, Señor(a) ${name}, le recordamos que tiene cita en la fecha ${fechacita}`
+      const messagethirtymin = `Buenas ${saludo}, Señor(a) ${name}, le recordamos que tiene cita en 30 min`
+      const now = moment()
       if (now.isSameOrBefore(scheduledTime.subtract(1, 'hour'))) {
         // Envía el mensaje de texto con Twilio
         return fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccount}/Messages.json`, {
@@ -52,7 +58,7 @@ async function sendSmsFromSheet(req, res) {
         return fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccount}/Messages.json`, {
           method: 'POST',
           headers: {
-            'Authorization': 'Basic ' + buf.toString(twilioAccount + ':' + twilioAuth),
+            'Authorization': 'Basic ' + Buffer.from(twilioAccount + ':' + twilioAuth).toString('base64'),
             'Content-Type': 'application/x-www-form-urlencoded'
           },
           body: `To=${celular}&From=${twilioPhoneNum}&Body=${messagethirtymin}`
@@ -65,7 +71,7 @@ async function sendSmsFromSheet(req, res) {
       }
     })
     .catch(error => {
-      console.error(error);
+      console.error('Hubo un problema con la solicitud Fetch:', error.message)
     });
 
   res.send('Mensajes SMS enviados');
