@@ -10,7 +10,7 @@ const twilioAccount = process.env.YOUR_TWILIO_ACCOUNT_SID
 const twilioAuth = process.env.YOUR_TWILIO_AUTH_TOKEN
 const spreadsheetId = process.env.YOUR_SPREADSHEET_ID
 const twilioPhoneNum = process.env.YOUR_TWILIO_PHONE_NUMBER
-const range = process.env.range
+const range = process.env.RANGE
 const apiKey = process.env.APIKEY
 
 //Funcion principal
@@ -99,7 +99,7 @@ app.listen(3000, () => {
 app.get('/', sendSmsFromSheet);
 
 //El servidor esta escuchando
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 7000;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
