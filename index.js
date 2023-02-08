@@ -91,10 +91,6 @@ app.get('/', (req, res) => {
   res.sendFile(filePath);
 });
 
-app.listen(3000, () => {
-  console.log('Example app listening on port 3000!');
-});
-
 // Ruta de activacion de la funcion sendSmsFromSheet
 app.get('/', sendSmsFromSheet);
 
