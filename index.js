@@ -1,5 +1,4 @@
 //Dependencias
-const { google } = require('googleapis')
 const twilio = require('twilio');
 const moment = require('moment');
 const express = require('express');
@@ -8,35 +7,27 @@ const path = require('path');
 require('dotenv').config()
 
 //Variables de entorno
-const clientIdent = process.env.CLIENTID
-const clientSecrets = process.env.CLIENTSECRET
-const UriAuth = process.env.AUTHURI
-const tokenUri = process.env.TOKENURI
+const correomio = process.env.CORREO
+const privateKey = process.env.APIKEY
 const twilioAccount = process.env.YOUR_TWILIO_ACCOUNT_SID
 const twilioAuth = process.env.YOUR_TWILIO_AUTH_TOKEN
 const spreadsheetId = process.env.YOUR_SPREADSHEET_ID
 const twilioPhoneNum = process.env.YOUR_TWILIO_PHONE_NUMBER
 
+
 //Funcion principal
 async function sendSmsFromSheet(req, res) {
   // Autenticate usando GoogleAPIS OAuth2
-  const Authenticate = new google.auth.OAuth2({
-    client_id: clientIdent,
-    client_secret: clientSecrets,
-    auth_uri: UriAuth,
-    token_uri: tokenUri
+  const doc = new GoogleSpreadsheet(`${spreadsheetId}`);
+  await doc.useServiceAccountAuth({
+    client_email: `${correomio}`,
+    private_key: `${privateKey}`,
   });
-
-  // ... Usa el objeto traido de googleapis con los datos de la constante Authenticate para logear en google
-  const sheets = google.sheets({ version: 'v4', auth: Authenticate });
 
   // Lee datos de google sheet
-  const sheet = await sheets.spreadsheets.values.get({
-    spreadsheetId: `${spreadsheetId}`,
-    range: 'Sheet1!A1:E1',
-  });
-  const rows = sheet.data.values;
-
+  await doc.loadInfo();
+  const sheet = doc.sheetsByIndex[0];
+  const rows = await sheet.getRows();
   // Inicializa el cliente de twilio
   const client = twilio(
     `${twilioAccount}`,
@@ -54,7 +45,7 @@ async function sendSmsFromSheet(req, res) {
     saludo = 'Buenas noches!';
   }
 
-  // Loop sobre la fila o row que trae el objeto sheet con toda su informacion
+  // Loop sobre la fila o row que trae el objeto sheet con toda su informacion y lo envia a twilio
   for (const row of rows) {
     const [, , date, name, phoneNumber] = row;
     const appointmentDatetime = moment(date, 'MM/DD/YYYY HH:mm');
@@ -89,7 +80,7 @@ async function sendSmsFromSheet(req, res) {
   }
 
   res.send('Mensajes SMS enviados');
-  
+
 }
 
 // Programa el envio de los mensajes de texto por cron
@@ -103,23 +94,19 @@ exports.handler = async function (event, context) {
 app.get('/', (req, res) => {
   // Crea la ruta absoluta al archivo HTML
   const filePath = path.join(__dirname, 'politicasprivacidad.html');
-  
+
   // Establece el tipo de contenido de la respuesta como text/html
   res.set('Content-Type', 'text/html');
-  
+
   // Envía el archivo HTML como respuesta a la petición
   res.sendFile(filePath);
-});
-
-app.listen(3000, () => {
-  console.log('Example app listening on port 3000!');
 });
 
 // Ruta de activacion de la funcion sendSmsFromSheet
 app.get('/', sendSmsFromSheet);
 
 //El servidor esta escuchando
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8989;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
