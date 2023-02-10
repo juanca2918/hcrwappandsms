@@ -3,7 +3,7 @@ const twilio = require('twilio');
 const moment = require('moment');
 const express = require('express');
 const app = express();
-const path = require('path');
+const GoogleSpreadsheet = require('google-spreadsheet');
 require('dotenv').config()
 
 //Variables de entorno
@@ -13,7 +13,6 @@ const twilioAccount = process.env.YOUR_TWILIO_ACCOUNT_SID
 const twilioAuth = process.env.YOUR_TWILIO_AUTH_TOKEN
 const spreadsheetId = process.env.YOUR_SPREADSHEET_ID
 const twilioPhoneNum = process.env.YOUR_TWILIO_PHONE_NUMBER
-
 
 //Funcion principal
 async function sendSmsFromSheet(req, res) {
@@ -87,18 +86,6 @@ exports.handler = async function (event, context) {
   job.start();
   return { statusCode: 200, body: 'SMS sending job started' }
 }
-
-// Rutas direccionadas
-app.get('/', (req, res) => {
-  // Crea la ruta absoluta al archivo HTML
-  const filePath = path.join(__dirname, 'politicasprivacidad.html');
-
-  // Establece el tipo de contenido de la respuesta como text/html
-  res.set('Content-Type', 'text/html');
-
-  // Envía el archivo HTML como respuesta a la petición
-  res.sendFile(filePath);
-});
 
 // Ruta de activacion de la funcion sendSmsFromSheet
 app.get('/', sendSmsFromSheet);
