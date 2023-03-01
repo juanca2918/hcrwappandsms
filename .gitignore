@@ -5,6 +5,8 @@ secret.json
 # Local Netlify folder
 .netlify
 .vercel
-credentials.json
+credentialsGoogle.json
 apoyo.js
 .idea
+GeneralCredentials.json
+credenciales
