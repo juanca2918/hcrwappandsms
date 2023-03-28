@@ -1,12 +1,6 @@
 node_modules
-.env
-secret.json
 .vscode
 # Local Netlify folder
 .netlify
 .vercel
-credentialsGoogle.json
-apoyo.js
-.idea
-GeneralCredentials.json
-credenciales
+credentials.json

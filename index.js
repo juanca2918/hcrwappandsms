@@ -1,22 +1,22 @@
 const { google } = require('googleapis');
-const { OAuth2Client } = require('google-auth-library');
-const {JWT} = require('google-auth-library');
+const {OAuth2Client} = require('google-auth-library');
 const moment = require('moment')
-const generalCredentials = require('./GeneralCredentials.json')
-const credentialsGoogle = require('./credentialsGoogle.json')
-const twilioAccount =  generalCredentials.account_sid
-const twilioAuth =  generalCredentials.auth_token
-const twilio = require('twilio')(twilioAccount,twilioAuth)
+const credentials = require('./credentials.json')
+const twilioAccount =  credentials.twilio.AccountSID
+const twilioAuth =  credentials.twilio.AuthToken
+const twilio = require('twilio')(twilioAccount, twilioAuth)
+const path = require('path');
+const fs = require('fs')
 require('dotenv').config()
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 // Crea un nuevo cliente de OAuth2 con tus credenciales
 const client = new OAuth2Client(
-  credentialsGoogle.web.client_id,
-  credentialsGoogle.web.client_secret,
-  credentialsGoogle.web.redirect_uris,
-  credentialsGoogle.web.auth_uri,
+  credentials.web.client_id,
+  credentials.web.client_secret,
+  credentials.web.redirect_uris,
+  credentials.web.auth_uri,
 );
 
 // Genera un enlace de autorización de OAuth2
@@ -38,8 +38,8 @@ async function getAccessToken(code) {
 async function getSpreadsheets(accessToken) {
   const sheets = google.sheets({ version: 'v4', auth: accessToken });
   const sheetData = await sheets.spreadsheets.values.get({
-    range: generalCredentials.range,
-    spreadsheetId: generalCredentials.your_spreadsheet_id,
+    range: credentials.range,
+    spreadsheetId: credentials.your_spreadsheet_id,
   })
   const values = sheetData.data.values
   return values
@@ -60,6 +60,7 @@ async function handleCallback(req, res) {
   const spreadsheetsData = await getSpreadsheets(tokens.access_token);
   recorreSpreadSheet(spreadsheetsData)
 }
+
 
 async function recorreSpreadSheet(sheetDatavalues) { 
   
@@ -89,7 +90,7 @@ async function recorreSpreadSheet(sheetDatavalues) {
       // Send an SMS message with Twilio
       await twilio.messages.create({
         to: phone,
-        from: generalCredentials.your_twilio_phonenumber,
+        from: credentials.twilio.MyTwilioPhoneNumber,
         body: messageOneDay,
       });
     }
@@ -99,24 +100,24 @@ async function recorreSpreadSheet(sheetDatavalues) {
       // Send an SMS message with Twilio
       await twilio.messages.create({
         to: phone,
-        from: generalCredentials.your_twilio_phonenumber,
+        from: credentials.twilio.MyTwilioPhoneNumber,
         body: messagethirtymin,
       });
     }
   }
 }
 
-/* async function vistaIndex(req, res) {
+async function vistaIndex(req, res) {
   const filePath = path.join(__dirname, 'index.html');
   const htmlContent = await fs.promises.readFile(filePath, 'utf8');
   res.header('Content-Type', 'text/html');
   res.send(htmlContent);
-} */
+}
 
 const express = require('express');
 const app = express();
 
-/* app.get('/', vistaIndex) */
+app.get('/', vistaIndex)
 app.get('/', handleAuth).setMaxListeners(15);
 app.get('/auth/google/callback', handleCallback).setMaxListeners(15);
 
